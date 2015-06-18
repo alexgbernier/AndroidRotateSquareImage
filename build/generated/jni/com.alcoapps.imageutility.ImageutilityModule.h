@@ -30,8 +30,8 @@ public:
 
 private:
 	// Methods -----------------------------------------------------------
-	static v8::Handle<v8::Value> example(const v8::Arguments&);
 	static v8::Handle<v8::Value> rotateResizeImage(const v8::Arguments&);
+	static v8::Handle<v8::Value> example(const v8::Arguments&);
 
 	// Dynamic property accessors ----------------------------------------
 	static v8::Handle<v8::Value> getter_exampleProp(v8::Local<v8::String> property, const v8::AccessorInfo& info);

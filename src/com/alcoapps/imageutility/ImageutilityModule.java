@@ -17,6 +17,7 @@ package com.alcoapps.imageutility;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.lang.Math;
  
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollModule;
@@ -72,15 +73,15 @@ public class ImageutilityModule extends KrollModule
      * @return
      */
     @Kroll.method
-    public Boolean rotateResizeImage(String filename, int size, int quality)
+    public Boolean rotateResizeImage(String filename, int size, int quality, float zoom)
     {
-        Log.i(TAG, "In rotateResizeImage");
         File imageFile = null;
         FileInputStream fileInputStream = null;
         FileInputStream fileInputStream2 = null;
         FileOutputStream fileOutputStream = null;
         Bitmap scaledBitmap = null;
         Bitmap resizedBitmap = null;
+        Bitmap zoomedBitmap = null;
         try
         {
             // Determine the orientation
@@ -96,9 +97,15 @@ public class ImageutilityModule extends KrollModule
             BitmapFactory.decodeStream(fileInputStream, null, opts);
             Log.i(TAG, "Original image size: " + opts.outWidth + "x" + opts.outHeight);
  
+            // Determine intermediate size based on zoom
+            int intermediateSize = (int) (size / zoom);
+
+            Log.i(TAG, "Intermediate target size: " + intermediateSize);
+            
             // Determine scaling based on size
+            int smallestDimension = Math.min(opts.outWidth, opts.outHeight);
             int sample = 1;
-            while (opts.outWidth / sample / 2 >= size || opts.outHeight / sample / 2 >= size) {
+            while (smallestDimension / sample / 2 >= intermediateSize) {
                 sample *= 2;
             }
             opts = new BitmapFactory.Options();
@@ -111,26 +118,56 @@ public class ImageutilityModule extends KrollModule
             Log.i(TAG, "Sampled image size: " + opts.outWidth + "x" + opts.outHeight);
  
             // Create the appropriate Matrix to resize and rotate then create Bitmap
-            float scale = (float)size / (float)(opts.outWidth > opts.outHeight ? opts.outWidth : opts.outHeight);
+            float scale = (float)intermediateSize / (float)(opts.outWidth > opts.outHeight ? opts.outWidth : opts.outHeight);
             Matrix matrix = new Matrix();
             matrix.postRotate(rotation);
             matrix.postScale(scale, scale);
-            resizedBitmap = Bitmap.createBitmap(scaledBitmap, 0, 0, (int)scaledBitmap.getWidth(), (int)scaledBitmap.getHeight(), matrix, true);
-            Log.i(TAG, "Scaled image size: " + resizedBitmap.getWidth() + "x" + resizedBitmap.getHeight());
+            
+            // Square that madness
+            int intermediateCropSize = 0;
+            int x = 0;
+            int y = 0;
+            
+            if (opts.outWidth >= opts.outHeight){
+	            intermediateCropSize = opts.outHeight;
+	            x = (opts.outWidth - intermediateCropSize)/2;
+	            y = 0;
+            } else {
+	            intermediateCropSize = opts.outWidth;
+	            x = 0;
+	            y = (opts.outHeight - intermediateCropSize)/2;
+            }
+            
+            Log.i(TAG, "Squaring coordinates: " + x + ", " + y);
+            
+            resizedBitmap = Bitmap.createBitmap(scaledBitmap, x, y, intermediateCropSize, intermediateCropSize, matrix, true);
+            Log.i(TAG, "Resized size: " + resizedBitmap.getWidth() + "x" + resizedBitmap.getHeight());
  
-            // Delete old file
+            // Scale that madness
+            if (zoom < 1) {
+            	int cropOffset = (resizedBitmap.getWidth() - size)/2;
+
+                Log.i(TAG, "Cropping offset: " + cropOffset);
+                
+            	zoomedBitmap = Bitmap.createBitmap(resizedBitmap, cropOffset, cropOffset, size, size);
+            	Log.i(TAG, "Cropped size: " + zoomedBitmap.getWidth() + "x" + zoomedBitmap.getHeight());
+            } else {
+            	zoomedBitmap = resizedBitmap;
+            }
+            
+            // Recreate file
             imageFile.delete();
-            Log.i(TAG,  "Deleted old file");
- 
-            // Create new file
             imageFile.createNewFile();
-            Log.i(TAG,  "Created new file");
- 
+
             // Copy rotated, resized image to new file
             fileOutputStream = new FileOutputStream(imageFile);
-            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, fileOutputStream);
+            
+            // Compress
+            zoomedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, fileOutputStream);
+            Log.i(TAG, "Compressed image to " + quality + " quality");
+
             fileOutputStream.flush();
-            Log.i(TAG,  "Copied rotated, resized image to new file");
+            Log.i(TAG, "Saved image to file");
  
             return true;
         }
@@ -171,6 +208,10 @@ public class ImageutilityModule extends KrollModule
             if(resizedBitmap != null) {
                 resizedBitmap.recycle();
                 resizedBitmap = null;
+            }
+            if(zoomedBitmap != null) {
+            	zoomedBitmap.recycle();
+            	zoomedBitmap = null;
             }
         }
     }

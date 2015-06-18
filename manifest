@@ -2,8 +2,9 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 1.0
+version: 1.1
 apiversion: 2
+architectures: armeabi armeabi-v7a x86
 description: My module
 author: Ricardo Alcocer
 license: Specify your license
@@ -15,4 +16,4 @@ name: imageutility
 moduleid: com.alcoapps.imageutility
 guid: e4f00f2c-8b61-4deb-87ba-7050f86aa022
 platform: android
-minsdk: 3.2.3.GA
+minsdk: 4.0.0.RC

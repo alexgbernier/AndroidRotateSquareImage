@@ -90,8 +90,8 @@ Handle<FunctionTemplate> ImageutilityModule::getProxyTemplate()
 	titanium::ProxyFactory::registerProxyPair(javaClass, *proxyTemplate);
 
 	// Method bindings --------------------------------------------------------
-	DEFINE_PROTOTYPE_METHOD(proxyTemplate, "example", ImageutilityModule::example);
 	DEFINE_PROTOTYPE_METHOD(proxyTemplate, "rotateResizeImage", ImageutilityModule::rotateResizeImage);
+	DEFINE_PROTOTYPE_METHOD(proxyTemplate, "example", ImageutilityModule::example);
 
 	Local<ObjectTemplate> prototypeTemplate = proxyTemplate->PrototypeTemplate();
 	Local<ObjectTemplate> instanceTemplate = proxyTemplate->InstanceTemplate();
@@ -129,6 +129,125 @@ Handle<FunctionTemplate> ImageutilityModule::getProxyTemplate()
 }
 
 // Methods --------------------------------------------------------------------
+Handle<Value> ImageutilityModule::rotateResizeImage(const Arguments& args)
+{
+	LOGD(TAG, "rotateResizeImage()");
+	HandleScope scope;
+
+	JNIEnv *env = titanium::JNIScope::getEnv();
+	if (!env) {
+		return titanium::JSException::GetJNIEnvironmentError();
+	}
+	static jmethodID methodID = NULL;
+	if (!methodID) {
+		methodID = env->GetMethodID(ImageutilityModule::javaClass, "rotateResizeImage", "(Ljava/lang/String;IIF)Ljava/lang/Boolean;");
+		if (!methodID) {
+			const char *error = "Couldn't find proxy method 'rotateResizeImage' with signature '(Ljava/lang/String;IIF)Ljava/lang/Boolean;'";
+			LOGE(TAG, error);
+				return titanium::JSException::Error(error);
+		}
+	}
+
+	titanium::Proxy* proxy = titanium::Proxy::unwrap(args.Holder());
+
+	if (args.Length() < 4) {
+		char errorStringBuffer[100];
+		sprintf(errorStringBuffer, "rotateResizeImage: Invalid number of arguments. Expected 4 but got %d", args.Length());
+		return ThrowException(Exception::Error(String::New(errorStringBuffer)));
+	}
+
+	jvalue jArguments[4];
+
+
+
+
+	
+	
+	if (!args[0]->IsNull()) {
+		Local<Value> arg_0 = args[0];
+		jArguments[0].l =
+			titanium::TypeConverter::jsValueToJavaString(env, arg_0);
+	} else {
+		jArguments[0].l = NULL;
+	}
+
+	
+	
+		if ((titanium::V8Util::isNaN(args[1]) && !args[1]->IsUndefined()) || args[1]->ToString()->Length() == 0) {
+			const char *error = "Invalid value, expected type Number.";
+			LOGE(TAG, error);
+			return titanium::JSException::Error(error);
+		}
+	if (!args[1]->IsNull()) {
+		Local<Number> arg_1 = args[1]->ToNumber();
+		jArguments[1].i =
+			titanium::TypeConverter::jsNumberToJavaInt(env, arg_1);
+	} else {
+		jArguments[1].i = NULL;
+	}
+
+	
+	
+		if ((titanium::V8Util::isNaN(args[2]) && !args[2]->IsUndefined()) || args[2]->ToString()->Length() == 0) {
+			const char *error = "Invalid value, expected type Number.";
+			LOGE(TAG, error);
+			return titanium::JSException::Error(error);
+		}
+	if (!args[2]->IsNull()) {
+		Local<Number> arg_2 = args[2]->ToNumber();
+		jArguments[2].i =
+			titanium::TypeConverter::jsNumberToJavaInt(env, arg_2);
+	} else {
+		jArguments[2].i = NULL;
+	}
+
+	
+	
+		if ((titanium::V8Util::isNaN(args[3]) && !args[3]->IsUndefined()) || args[3]->ToString()->Length() == 0) {
+			const char *error = "Invalid value, expected type Number.";
+			LOGE(TAG, error);
+			return titanium::JSException::Error(error);
+		}
+	if (!args[3]->IsNull()) {
+		Local<Number> arg_3 = args[3]->ToNumber();
+		jArguments[3].f =
+			titanium::TypeConverter::jsNumberToJavaFloat(env, arg_3);
+	} else {
+		jArguments[3].f = NULL;
+	}
+
+	jobject javaProxy = proxy->getJavaObject();
+	jobject jResult = (jobject)env->CallObjectMethodA(javaProxy, methodID, jArguments);
+
+
+
+	if (!JavaObject::useGlobalRefs) {
+		env->DeleteLocalRef(javaProxy);
+	}
+
+
+
+				env->DeleteLocalRef(jArguments[0].l);
+
+
+	if (env->ExceptionCheck()) {
+		Handle<Value> jsException = titanium::JSException::fromJavaException();
+		env->ExceptionClear();
+		return jsException;
+	}
+
+	if (jResult == NULL) {
+		return Null();
+	}
+
+	Handle<Value> v8Result = titanium::TypeConverter::javaObjectToJsValue(env, jResult);
+
+	env->DeleteLocalRef(jResult);
+
+
+	return v8Result;
+
+}
 Handle<Value> ImageutilityModule::example(const Arguments& args)
 {
 	LOGD(TAG, "example()");
@@ -174,110 +293,6 @@ Handle<Value> ImageutilityModule::example(const Arguments& args)
 	}
 
 	Handle<Value> v8Result = titanium::TypeConverter::javaStringToJsString(env, jResult);
-
-	env->DeleteLocalRef(jResult);
-
-
-	return v8Result;
-
-}
-Handle<Value> ImageutilityModule::rotateResizeImage(const Arguments& args)
-{
-	LOGD(TAG, "rotateResizeImage()");
-	HandleScope scope;
-
-	JNIEnv *env = titanium::JNIScope::getEnv();
-	if (!env) {
-		return titanium::JSException::GetJNIEnvironmentError();
-	}
-	static jmethodID methodID = NULL;
-	if (!methodID) {
-		methodID = env->GetMethodID(ImageutilityModule::javaClass, "rotateResizeImage", "(Ljava/lang/String;II)Ljava/lang/Boolean;");
-		if (!methodID) {
-			const char *error = "Couldn't find proxy method 'rotateResizeImage' with signature '(Ljava/lang/String;II)Ljava/lang/Boolean;'";
-			LOGE(TAG, error);
-				return titanium::JSException::Error(error);
-		}
-	}
-
-	titanium::Proxy* proxy = titanium::Proxy::unwrap(args.Holder());
-
-	if (args.Length() < 3) {
-		char errorStringBuffer[100];
-		sprintf(errorStringBuffer, "rotateResizeImage: Invalid number of arguments. Expected 3 but got %d", args.Length());
-		return ThrowException(Exception::Error(String::New(errorStringBuffer)));
-	}
-
-	jvalue jArguments[3];
-
-
-
-
-	
-	
-	if (!args[0]->IsNull()) {
-		Local<Value> arg_0 = args[0];
-		jArguments[0].l =
-			titanium::TypeConverter::jsValueToJavaString(env, arg_0);
-	} else {
-		jArguments[0].l = NULL;
-	}
-
-	
-	
-		if (titanium::V8Util::isNaN(args[1]) || args[1]->ToString()->Length() == 0) {
-			const char *error = "Invalid value, expected type Number.";
-			LOGE(TAG, error);
-			return titanium::JSException::Error(error);
-		}
-	if (!args[1]->IsNull()) {
-		Local<Number> arg_1 = args[1]->ToNumber();
-		jArguments[1].i =
-			titanium::TypeConverter::jsNumberToJavaInt(env, arg_1);
-	} else {
-		jArguments[1].i = NULL;
-	}
-
-	
-	
-		if (titanium::V8Util::isNaN(args[2]) || args[2]->ToString()->Length() == 0) {
-			const char *error = "Invalid value, expected type Number.";
-			LOGE(TAG, error);
-			return titanium::JSException::Error(error);
-		}
-	if (!args[2]->IsNull()) {
-		Local<Number> arg_2 = args[2]->ToNumber();
-		jArguments[2].i =
-			titanium::TypeConverter::jsNumberToJavaInt(env, arg_2);
-	} else {
-		jArguments[2].i = NULL;
-	}
-
-	jobject javaProxy = proxy->getJavaObject();
-	jobject jResult = (jobject)env->CallObjectMethodA(javaProxy, methodID, jArguments);
-
-
-
-	if (!JavaObject::useGlobalRefs) {
-		env->DeleteLocalRef(javaProxy);
-	}
-
-
-
-				env->DeleteLocalRef(jArguments[0].l);
-
-
-	if (env->ExceptionCheck()) {
-		Handle<Value> jsException = titanium::JSException::fromJavaException();
-		env->ExceptionClear();
-		return jsException;
-	}
-
-	if (jResult == NULL) {
-		return Null();
-	}
-
-	Handle<Value> v8Result = titanium::TypeConverter::javaObjectToJsValue(env, jResult);
 
 	env->DeleteLocalRef(jResult);
 
