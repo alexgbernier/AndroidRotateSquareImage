@@ -1,4 +1,4 @@
-# Android Image Rotate
+# AndroidRotateSquareImage
 
 There's a annoying, yet somewhat rare issue when taking photos with certain Andorid devices, where the orientation information is not properlly identified by Titanium, causing a photo taken in portrait format to be returned as landscape.
 
